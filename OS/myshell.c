@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <fcntl.h>
 
+#define FILE_SIZE 1000
 #define BUF_SIZE  100
 #define PARAM_SIZE  10 // number of parameters
 
@@ -14,26 +18,52 @@ void setPrompt(){
 	strcat(prompt, "> ");
 }
 
-void execute(int param_no){
+int _chdir(){
+	int st = chdir(params[1]);
+	if(st==0) {
+		getcwd(prompt, 100);
+		setPrompt();
+	}else{
+		perror(params[1]);
+	}
+}
+
+int _pwd(){
+	char cwd[100];
+	getcwd(cwd,100);
+	printf("%s\n", cwd);
+}
+
+int _mkdir(){
+	int st = mkdir(params[1], S_IRWXU);
+	if(st!=0)
+		perror('\0');
+}
+
+int _rmdir(){
+	int st = rmdir(params[1]);
+	if(st!=0){
+		perror(params[1]);
+		//if(errno==ENOENT)
+	}
+}
+
+int execute(int param_no){
 	if(strcmp(params[0], "cd")==0){
-		
-		int st = chdir(params[1]);
-		if(st==0) {
-			getcwd(prompt, 100);
-			setPrompt();
-		}else{
-			perror("cd");
-		}
+		return _chdir();
 	}else if(strcmp(params[0], "pwd")==0){
-
+		return _pwd();
 	}else if(strcmp(params[0], "mkdir")==0){
-
+		return _mkdir();
 	}else if(strcmp(params[0], "rmdir")==0){
-
+		return _rmdir();
 	}else if(strcmp(params[0], "ls")==0){
+		/*if(params[1]=='-l'){
 
+		}*/
 	}else if(strcmp(params[0], "cp")==0){
-
+		// check existence and read permission
+	
 	}else if(strcmp(params[0], "exit")==0){
 
 	}else{
